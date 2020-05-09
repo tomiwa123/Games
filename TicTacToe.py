@@ -27,11 +27,11 @@ def player_input():
     answer = [0, 0]
 
     while response not in typeset:
-        response = input('Please enter whether you wish to be x or o:').upper()
+        response = input('Please enter whether you wish to be x or o: ').upper()
     answer[0] = response
     response = 0
     while response not in num_set:
-        response = input('Please enter a number location')
+        response = input('Please enter a number location: ')
 
     answer[1] = int(response)
     return answer
@@ -80,7 +80,7 @@ def player_choice(board):
     numset = {"1", "2", "3", "4", "5", "6", "7", "8", "9"}
     response = -3
     while (response not in numset) or (not space_check(board, response)):
-        response = input('Please enter a number location')
+        response = input('Please enter a number location: ')
 
     return response
 
@@ -89,7 +89,7 @@ def replay():
     possible_answers = {"Y", "N", "y", "n", "Yes", "No"}
     response = 0
     while response not in possible_answers:
-        response = input('Would you like to jolly play again? ')
+        response = input('Would you like to jolly play again? y or n? ')
     return response in {"Y", "y", "Yes"}
 
 
@@ -119,20 +119,18 @@ if __name__ == '__main__':
             # Player 2 Turn
             if (full_board_check(board)):
                 print("No Winner")
-                game_is_on = False
+                break
             print("It is your turn player2 \n")
             pos = player_choice(board)
             place_marker(board, player2Avatar, pos)
             display_board(board)
             if win_check(board, player2Avatar):
                 print("player2 wins")
-                game_is_on = False
                 break
 
             # Player1's turn.
             if (full_board_check(board)):
                 print("No Winner")
-                game_is_on = False
                 break
             print("It is your turn player1 \n")
             pos = player_choice(board)
@@ -140,7 +138,6 @@ if __name__ == '__main__':
             display_board(board)
             if win_check(board, player1Avatar):
                 print("player1 wins")
-                game_is_on = False
                 break
                 # pass
 
