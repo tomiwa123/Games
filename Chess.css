@@ -21,3 +21,7 @@ image {
   width: 1px;
   height: 1px;
 }
+
+.highlight {
+  border: #0000EE solid 0.2em;
+}
