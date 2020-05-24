@@ -527,28 +527,163 @@ class QueenObj  {
   }
 }
 
+class KnightObj  {
+  constructor(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.buttonNumber = x + y * 8;
+    this.name = "knight";
+    this.color = color;
+  }
 
+  draw() {
+    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
+  }
+
+  draw(oldX, oldY) {
+    $("button").eq(oldX + oldY * 8).text("");
+    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
+    $("button").removeClass("highlight")
+  }
+
+  getPiece(x, y) {
+    piece = null
+    for (aPiece of allPieces) {
+      if (aPiece.x === x && aPiece.y === y) {
+        piece = aPiece
+      }
+    }
+    return piece
+  }
+
+  exploreDiagonal(newX, newY, check) {
+    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && check) {
+      console.log(this.getPiece(newX, newY))
+      if (this.getPiece(newX, newY) !== null) {
+        if (this.getPiece(newX, newY).color !== this.color) {
+          this.range.push(newX)
+          this.range.push(newY)
+        }
+        return false
+      } else {
+        this.range.push(newX)
+        this.range.push(newY)
+        return true
+      }
+    }
+    return false
+  }
+
+  getRange() {
+    this.range = []
+    let newX = this.x - 1
+    let newY = this.y - 2
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x + 1
+    newY = this.y - 2
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x + 2
+    newY = this.y - 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x + 2
+    newY = this.y + 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x + 1
+    newY = this.y + 2
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x - 1
+    newY = this.y + 2
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x - 2
+    newY = this.y + 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x - 2
+    newY = this.y - 1
+    this.exploreDiagonal(newX, newY, true)
+
+    return this.range
+  }
+
+  displayRange() {
+    if ($("button").hasClass("highlight")) {
+      $("button").removeClass("highlight")
+      return
+    }
+    const range = this.getRange()
+    console.log("New Loop")
+    for (let coord = 0; coord < range.length; coord += 2) {
+      console.log(`${range[coord]} ${range[coord + 1]}`)
+      $("button").eq(range[coord] + 8 * range[coord + 1]).toggleClass("highlight")
+    }
+  }
+
+  isValidMove(x, y, range) {
+    const rangeLength = range.length
+    for (let i = 0; i < rangeLength - 1; i += 2) {
+      if (range[i] == x && range[i+1] == y) {
+        return true
+      }
+    }
+    return false
+  }
+
+  move(x, y) {
+    const range = this.getRange()
+    if (!this.isValidMove(x, y, range)) {
+      console.log(`${x},${y},${yIndex},${xIndex}`)
+      console.log(range)
+      console.log("Invalid move. Nothing Done.")
+    } else {
+      let toDelete = null
+      for (piece of allPieces) {
+        if (piece.x === x && piece.y === y) {
+          toDelete = piece
+        }
+      }
+      if (toDelete !== null) {
+        allPieces.splice(allPieces.indexOf(toDelete), 1)
+      }
+      const oldX = this.x;
+      const oldY = this.y;
+      this.x = x;
+      this.y = y;
+      this.buttonNumber = x + y * 8;
+      this.draw(oldX, oldY);
+      this.hasMoved = true;
+    }
+  }
+}
 
 // Beginning of setting environment for game
 
 for (let row = 0; row < 8; row++) {
+  if (row > 1 && row < 6) {
+    continue
+  }
+  let color = "white"
   for (let col = 0; col < 8; col++) {
+    if (row < 2) {
+      color = "black"
+    }
     if (row === 1) {
-      allPieces.push(new PawnObj(col, row, "black"))
+      allPieces.push(new PawnObj(col, row, color))
     } else if (row === 6) {
-      allPieces.push(new PawnObj(col, row, "white"))
-    } else if (row === 0 && (col === 2 || col === 5)) {
-      allPieces.push(new BishopObj(col, row, "black"))
-    } else if (row === 7 && (col === 2 || col === 5)) {
-      allPieces.push(new BishopObj(col, row, "white"))
-    } else if (row === 0 && (col === 0 || col === 7)) {
-      allPieces.push(new RookObj(col, row, "black"))
-    } else if (row === 7 && (col === 0 || col === 7)) {
-      allPieces.push(new RookObj(col, row, "white"))
-    } else if (row == 0 && col == 4) {
-      allPieces.push(new QueenObj(col, row, "black"))
-    } else if (row == 7 && col == 4) {
-      allPieces.push(new QueenObj(col, row, "white"))
+      allPieces.push(new PawnObj(col, row, color))
+    } else if (col === 2 || col === 5) {
+      allPieces.push(new BishopObj(col, row, color))
+    }  else if (col === 0 || col === 7) {
+      allPieces.push(new RookObj(col, row, color))
+    }  else if (col == 4) {
+      allPieces.push(new QueenObj(col, row, color))
+    } else if (col == 1 || col == 6) {
+      allPieces.push(new KnightObj(col, row, color))
     }
   }
 }
