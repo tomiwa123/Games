@@ -10,16 +10,16 @@ for (let i = 0; i < 64; i++) {
 pawn = "<image src=\"pawn.png\" width=\"50\" height=\"50\"></image>"
 
 let allPieces = []
+let currentPiece = null
+let previousPiece = null
 
-class PawnObj  {
-  constructor(x, y, color) {
+class GeneralObj {
+  constructor(x, y, color, name) {
     this.x = x;
     this.y = y;
     this.buttonNumber = x + y * 8;
-    this.name = "pawn";
+    this.name = name;
     this.color = color;
-    this.direction = (color === "white") ? -1 : 1;
-    this.hasMoved = false;
   }
 
   draw() {
@@ -32,46 +32,41 @@ class PawnObj  {
     $("button").removeClass("highlight")
   }
 
-  getRange() {
-    let range = [this.x, this.y + this.direction,
-                  this.x, this.y + 2 * this.direction]
-    if (this.hasMoved) {
-        range.pop()
-        range.pop()
-    }
-    // Cannot move if another object in position
-    for (piece of allPieces) {
-      if (piece.x === this.x && piece.y === this.y + this.direction) {
-        range.shift()
-        range.shift()
-      }
-      if (range.length === 4) {
-        if (piece.x === this.x && piece.y === this.y + this.direction * 2) {
-          range.pop()
-          range.pop()
-        }
+  getPiece(x, y) {
+    piece = null
+    for (aPiece of allPieces) {
+      if (aPiece.x === x && aPiece.y === y) {
+        piece = aPiece
       }
     }
+    return piece
+  }
 
-    // Allow for capturing
-    for (piece of allPieces) {
-      if (piece.color != this.color &&
-          Math.abs(piece.x - this.x) === 1 &&
-          piece.y == this.y + this.direction) {
-        range.push(piece.x)
-        range.push(piece.y)
+  getPieceByType(name, color) {
+    piece = null
+    for (aPiece of allPieces) {
+      if (aPiece.name === name && aPiece.color === color) {
+        piece = aPiece
       }
     }
-    let newRange = []
-    for (let x = 0; x < range.length - 1; x+=2) {
-      let y = x + 1
-      if (!(range[x] < 0 || range[y] < 0 ||
-          range[x] > 7 || range[y] > 7)) {
-            newRange.push(range[x])
-            newRange.push(range[y])
-          }
+    return piece
+  }
+
+  exploreDiagonal(newX, newY, check) {
+    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && check) {
+      if (this.getPiece(newX, newY) !== null) {
+        if (this.getPiece(newX, newY).color !== this.color) {
+          this.range.push(newX)
+          this.range.push(newY)
+        }
+        return false
+      } else {
+        this.range.push(newX)
+        this.range.push(newY)
+        return true
+      }
     }
-    return newRange
+    return false
   }
 
   displayRange() {
@@ -98,15 +93,16 @@ class PawnObj  {
   move(x, y) {
     const range = this.getRange()
     if (!this.isValidMove(x, y, range)) {
-      console.log(`${x},${y},${yIndex},${xIndex}`)
+      console.log(`${x},${y}`)
       console.log(range)
       console.log("Invalid move. Nothing Done.")
     } else {
-      let toDelete = null
-      for (piece of allPieces) {
-        if (piece.x === x && piece.y === y) {
-          toDelete = piece
-        }
+      let toDelete = this.getPiece(x, y)
+
+      if (toDelete === null && this.name === "pawn" &&
+          Math.abs(x - this.x) === 1 && y === this.y + this.direction) {
+        toDelete = this.getPiece(x, this.y)
+        $("button").eq(x + this.y * 8).text("");
       }
       if (toDelete !== null) {
         allPieces.splice(allPieces.indexOf(toDelete), 1)
@@ -116,56 +112,88 @@ class PawnObj  {
       this.x = x;
       this.y = y;
       this.buttonNumber = x + y * 8;
+
+      // Check Error Check
+      if (this.getPieceByType("king", this.color).isChecked()) {
+        $('button').removeClass("highlight")
+        if (toDelete != null) {
+          allPieces.push(toDelete)
+          toDelete.draw()
+        }
+        this.x = oldX;
+        this.y = oldY;
+        this.buttonNumber = oldX + oldY * 8;
+        return "Self Check"
+      }
+
       this.draw(oldX, oldY);
       this.hasMoved = true;
     }
   }
 }
 
-class BishopObj  {
+class PawnObj extends GeneralObj {
   constructor(x, y, color) {
-    this.x = x;
-    this.y = y;
-    this.buttonNumber = x + y * 8;
-    this.name = "bishop";
-    this.color = color;
+    super(x, y, color, "pawn")
+    this.direction = (color === "white") ? -1 : 1;
+    this.hasMoved = false;
   }
 
-  draw() {
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-  }
-
-  draw(oldX, oldY) {
-    $("button").eq(oldX + oldY * 8).text("");
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-    $("button").removeClass("highlight")
-  }
-
-  getPiece(x, y) {
-    piece = null
-    for (aPiece of allPieces) {
-      if (aPiece.x === x && aPiece.y === y) {
-        piece = aPiece
-      }
-    }
-    return piece
-  }
-
-  exploreDiagonal(newX, newY, check) {
-    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && check) {
-      if (this.getPiece(newX, newY) !== null) {
-        if (this.getPiece(newX, newY).color !== this.color) {
-          this.range.push(newX)
-          this.range.push(newY)
+  getRange() {
+    this.range = []
+    let newX = this.x
+    let newY = this.y + this.direction
+    let toContinue = this.exploreDiagonal(newX, newY, true)
+    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 &&
+        !toContinue) {
+          this.range.pop()
+          this.range.pop()
         }
-        return false
-      } else {
-        this.range.push(newX)
-        this.range.push(newY)
-        return true
+
+    newY = this.y + 2 * this.direction
+    if (!this.hasMoved) {
+      toContinue = this.exploreDiagonal(newX, newY, toContinue)
+      if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 &&
+          !toContinue) {
+            this.range.pop()
+            this.range.pop()
+          }
+    }
+
+    newX = this.x - this.direction
+    newY = this.y + this.direction
+    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 &&
+        this.exploreDiagonal(newX, newY, true)) {
+          this.range.pop()
+          this.range.pop()
+        }
+
+    newX = this.x + this.direction
+    newY = this.y + this.direction
+    if (this.exploreDiagonal(newX, newY, true)) {
+          this.range.pop()
+          this.range.pop()
+    }
+
+    // Empasson implementation
+    if (previousPiece !== null) {
+      if (previousPiece.name === "pawn" && previousPiece.color !== this.color) {
+        let rank = this.color === "white" ? 3 : 4;
+        if (previousPiece.y === this.y && Math.abs(previousPiece.x - this.x) == 1 &&
+            this.y === rank) {
+          this.range.push(previousPiece.x)
+          this.range.push(previousPiece.y + this.direction)
+        }
       }
     }
-    return false
+
+    return this.range
+  }
+}
+
+class BishopObj extends GeneralObj  {
+  constructor(x, y, color) {
+    super(x, y, color, "bishop")
   }
 
   getRange() {
@@ -198,99 +226,11 @@ class BishopObj  {
     }
     return this.range
   }
-
-  displayRange() {
-    if ($("button").hasClass("highlight")) {
-      $("button").removeClass("highlight")
-      return
-    }
-    const range = this.getRange()
-    for (let coord = 0; coord < range.length; coord += 2) {
-      $("button").eq(range[coord] + 8 * range[coord + 1]).toggleClass("highlight")
-    }
-  }
-
-  isValidMove(x, y, range) {
-    const rangeLength = range.length
-    for (let i = 0; i < rangeLength - 1; i += 2) {
-      if (range[i] == x && range[i+1] == y) {
-        return true
-      }
-    }
-    return false
-  }
-
-  move(x, y) {
-    const range = this.getRange()
-    if (!this.isValidMove(x, y, range)) {
-      console.log(`${x},${y},${yIndex},${xIndex}`)
-      console.log(range)
-      console.log("Invalid move. Nothing Done.")
-    } else {
-      let toDelete = null
-      for (piece of allPieces) {
-        if (piece.x === x && piece.y === y) {
-          toDelete = piece
-        }
-      }
-      if (toDelete !== null) {
-        allPieces.splice(allPieces.indexOf(toDelete), 1)
-      }
-      const oldX = this.x;
-      const oldY = this.y;
-      this.x = x;
-      this.y = y;
-      this.buttonNumber = x + y * 8;
-      this.draw(oldX, oldY);
-      this.hasMoved = true;
-    }
-  }
 }
 
-class RookObj  {
+class RookObj extends GeneralObj  {
   constructor(x, y, color) {
-    this.x = x;
-    this.y = y;
-    this.buttonNumber = x + y * 8;
-    this.name = "rook";
-    this.color = color;
-  }
-
-  draw() {
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-  }
-
-  draw(oldX, oldY) {
-    $("button").eq(oldX + oldY * 8).text("");
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-    $("button").removeClass("highlight")
-  }
-
-  getPiece(x, y) {
-    piece = null
-    for (aPiece of allPieces) {
-      if (aPiece.x === x && aPiece.y === y) {
-        piece = aPiece
-      }
-    }
-    return piece
-  }
-
-  exploreDiagonal(newX, newY, check) {
-    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && check) {
-      if (this.getPiece(newX, newY) !== null) {
-        if (this.getPiece(newX, newY).color !== this.color) {
-          this.range.push(newX)
-          this.range.push(newY)
-        }
-        return false
-      } else {
-        this.range.push(newX)
-        this.range.push(newY)
-        return true
-      }
-    }
-    return false
+    super (x, y, color, "rook")
   }
 
   getRange() {
@@ -323,100 +263,11 @@ class RookObj  {
     }
     return this.range
   }
-
-  displayRange() {
-    if ($("button").hasClass("highlight")) {
-      $("button").removeClass("highlight")
-      return
-    }
-    const range = this.getRange()
-    for (let coord = 0; coord < range.length; coord += 2) {
-      $("button").eq(range[coord] + 8 * range[coord + 1]).toggleClass("highlight")
-    }
-  }
-
-  isValidMove(x, y, range) {
-    const rangeLength = range.length
-    for (let i = 0; i < rangeLength - 1; i += 2) {
-      if (range[i] == x && range[i+1] == y) {
-        return true
-      }
-    }
-    return false
-  }
-
-  move(x, y) {
-    const range = this.getRange()
-    if (!this.isValidMove(x, y, range)) {
-      console.log(`${x},${y},${yIndex},${xIndex}`)
-      console.log(range)
-      console.log("Invalid move. Nothing Done.")
-    } else {
-      let toDelete = null
-      for (piece of allPieces) {
-        if (piece.x === x && piece.y === y) {
-          toDelete = piece
-        }
-      }
-      if (toDelete !== null) {
-        allPieces.splice(allPieces.indexOf(toDelete), 1)
-      }
-      const oldX = this.x;
-      const oldY = this.y;
-      this.x = x;
-      this.y = y;
-      this.buttonNumber = x + y * 8;
-      this.draw(oldX, oldY);
-      this.hasMoved = true;
-    }
-  }
 }
 
-class QueenObj  {
+class QueenObj extends GeneralObj {
   constructor(x, y, color) {
-    this.x = x;
-    this.y = y;
-    this.buttonNumber = x + y * 8;
-    this.name = "Queen";
-    this.color = color;
-  }
-
-  draw() {
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-  }
-
-  draw(oldX, oldY) {
-    $("button").eq(oldX + oldY * 8).text("");
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-    $("button").removeClass("highlight")
-  }
-
-  getPiece(x, y) {
-    piece = null
-    for (aPiece of allPieces) {
-      if (aPiece.x === x && aPiece.y === y) {
-        piece = aPiece
-      }
-    }
-    return piece
-  }
-
-  exploreDiagonal(newX, newY, check) {
-    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && check) {
-      console.log(this.getPiece(newX, newY))
-      if (this.getPiece(newX, newY) !== null) {
-        if (this.getPiece(newX, newY).color !== this.color) {
-          this.range.push(newX)
-          this.range.push(newY)
-        }
-        return false
-      } else {
-        this.range.push(newX)
-        this.range.push(newY)
-        return true
-      }
-    }
-    return false
+    super(x, y, color, "Queen")
   }
 
   getRange() {
@@ -455,7 +306,6 @@ class QueenObj  {
       // Effort for top left
       newX = this.x - i
       newY = this.y - i
-      console.log(tl)
       tl = this.exploreDiagonal(newX, newY, tl)
 
       // Effort for top right
@@ -476,102 +326,11 @@ class QueenObj  {
     // console.log(this.range)
     return this.range
   }
-
-  displayRange() {
-    if ($("button").hasClass("highlight")) {
-      $("button").removeClass("highlight")
-      return
-    }
-    const range = this.getRange()
-    console.log("New Loop")
-    for (let coord = 0; coord < range.length; coord += 2) {
-      console.log(`${range[coord]} ${range[coord + 1]}`)
-      $("button").eq(range[coord] + 8 * range[coord + 1]).toggleClass("highlight")
-    }
-  }
-
-  isValidMove(x, y, range) {
-    const rangeLength = range.length
-    for (let i = 0; i < rangeLength - 1; i += 2) {
-      if (range[i] == x && range[i+1] == y) {
-        return true
-      }
-    }
-    return false
-  }
-
-  move(x, y) {
-    const range = this.getRange()
-    if (!this.isValidMove(x, y, range)) {
-      console.log(`${x},${y},${yIndex},${xIndex}`)
-      console.log(range)
-      console.log("Invalid move. Nothing Done.")
-    } else {
-      let toDelete = null
-      for (piece of allPieces) {
-        if (piece.x === x && piece.y === y) {
-          toDelete = piece
-        }
-      }
-      if (toDelete !== null) {
-        allPieces.splice(allPieces.indexOf(toDelete), 1)
-      }
-      const oldX = this.x;
-      const oldY = this.y;
-      this.x = x;
-      this.y = y;
-      this.buttonNumber = x + y * 8;
-      this.draw(oldX, oldY);
-      this.hasMoved = true;
-    }
-  }
 }
 
-class KnightObj  {
+class KnightObj extends GeneralObj  {
   constructor(x, y, color) {
-    this.x = x;
-    this.y = y;
-    this.buttonNumber = x + y * 8;
-    this.name = "knight";
-    this.color = color;
-  }
-
-  draw() {
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-  }
-
-  draw(oldX, oldY) {
-    $("button").eq(oldX + oldY * 8).text("");
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-    $("button").removeClass("highlight")
-  }
-
-  getPiece(x, y) {
-    piece = null
-    for (aPiece of allPieces) {
-      if (aPiece.x === x && aPiece.y === y) {
-        piece = aPiece
-      }
-    }
-    return piece
-  }
-
-  exploreDiagonal(newX, newY, check) {
-    if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 && check) {
-      console.log(this.getPiece(newX, newY))
-      if (this.getPiece(newX, newY) !== null) {
-        if (this.getPiece(newX, newY).color !== this.color) {
-          this.range.push(newX)
-          this.range.push(newY)
-        }
-        return false
-      } else {
-        this.range.push(newX)
-        this.range.push(newY)
-        return true
-      }
-    }
-    return false
+    super(x, y, color, "knight")
   }
 
   getRange() {
@@ -610,56 +369,79 @@ class KnightObj  {
 
     return this.range
   }
+}
 
-  displayRange() {
-    if ($("button").hasClass("highlight")) {
-      $("button").removeClass("highlight")
-      return
-    }
-    const range = this.getRange()
-    console.log("New Loop")
-    for (let coord = 0; coord < range.length; coord += 2) {
-      console.log(`${range[coord]} ${range[coord + 1]}`)
-      $("button").eq(range[coord] + 8 * range[coord + 1]).toggleClass("highlight")
-    }
+class KingObj extends GeneralObj {
+  constructor(x, y, color) {
+    super(x, y, color, "king")
   }
 
-  isValidMove(x, y, range) {
-    const rangeLength = range.length
-    for (let i = 0; i < rangeLength - 1; i += 2) {
-      if (range[i] == x && range[i+1] == y) {
-        return true
+  getRange() {
+    this.range = []
+    let newX = this.x
+    let newY = this.y - 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x + 1
+    newY = this.y
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x
+    newY = this.y + 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x - 1
+    newY = this.y
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x + 1
+    newY = this.y - 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x + 1
+    newY = this.y + 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x - 1
+    newY = this.y + 1
+    this.exploreDiagonal(newX, newY, true)
+
+    newX = this.x - 1
+    newY = this.y - 1
+    this.exploreDiagonal(newX, newY, true)
+
+    return this.range
+  }
+
+  isChecked() {
+    for (piece of allPieces) {
+      if (piece.color !== this.color) {
+        let range = piece.getRange()
+        for (let x = 0; x < range.length - 1; x += 2) {
+          if (range[x] === this.x && range[x + 1] === this.y) {
+            return true
+          }
+        }
       }
     }
     return false
   }
 
-  move(x, y) {
-    const range = this.getRange()
-    if (!this.isValidMove(x, y, range)) {
-      console.log(`${x},${y},${yIndex},${xIndex}`)
-      console.log(range)
-      console.log("Invalid move. Nothing Done.")
-    } else {
-      let toDelete = null
-      for (piece of allPieces) {
-        if (piece.x === x && piece.y === y) {
-          toDelete = piece
+  isCheckmated() {
+    for (piece of allPieces) {
+      if (piece.color === this.color) {
+        let range = piece.getRange()
+        for (let x = 0; x < range.length - 1; x += 2) {
+          if (piece.move(range[x], range[x + 1]) !== undefined) {
+            return true
+          }
         }
       }
-      if (toDelete !== null) {
-        allPieces.splice(allPieces.indexOf(toDelete), 1)
-      }
-      const oldX = this.x;
-      const oldY = this.y;
-      this.x = x;
-      this.y = y;
-      this.buttonNumber = x + y * 8;
-      this.draw(oldX, oldY);
-      this.hasMoved = true;
     }
+    return false
   }
 }
+
 
 // Beginning of setting environment for game
 
@@ -684,14 +466,14 @@ for (let row = 0; row < 8; row++) {
       allPieces.push(new QueenObj(col, row, color))
     } else if (col == 1 || col == 6) {
       allPieces.push(new KnightObj(col, row, color))
+    } else {
+      allPieces.push(new KingObj(col, row, color))
     }
   }
 }
 for (piece of allPieces) {
   piece.draw()
 }
-
-let currentPiece = null
 
 // Respond to click to show moves
 $("button").click(function () {
@@ -703,10 +485,16 @@ $("button").click(function () {
     }
   }
   if ($(this).hasClass("highlight")) {
-    currentPiece.move(index % 8, Math.floor(index / 8))
+    if (currentPiece.move(index % 8, Math.floor(index / 8)) !== undefined) {
+      alert("Need to perform a move that resolves Check")
+    }
+
   } else if (piece != null) {
+    if (piece !== currentPiece) {
+      previousPiece = currentPiece
+      currentPiece = piece
+    }
     piece.displayRange()
-    currentPiece = piece
   } else {
     $("button").removeClass("highlight")
   }
