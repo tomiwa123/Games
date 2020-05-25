@@ -451,12 +451,11 @@ class KingObj extends GeneralObj {
     this.exploreDiagonal(newX, newY, true)
 
     //Implementing Castling
-    if (this.x === 4 && !this.hasMoved) {
+    if (this.x === 4 && !this.hasMoved && !this.isChecked()) {
       let rook = this.getPieceByTypeAndLocation("rook", this.color, 7, this.y)
       if (rook !== null && !rook.hasMoved) {
-        console.log("Here")
-        if (this.getPiece(5, this.y) === null &&
-            this.getPiece(6, this.y) === null) {
+        if (this.getPiece(5, this.y) === null && this.isChecked(5) &&
+            this.getPiece(6, this.y) === null && this.isChecked(6)) {
           this.range.push(6)
           this.range.push(this.y)
         }
@@ -466,13 +465,13 @@ class KingObj extends GeneralObj {
     return this.range
   }
 
-  isChecked() {
+  isChecked(x = this.x, y = this.y) {
     let piece;
     for (piece of allPieces) {
-      if (piece.color !== this.color) {
+      if (piece.color !== this.color && piece.name !== this.name) {
         let range = piece.getRange()
-        for (let x = 0; x < range.length - 1; x += 2) {
-          if (range[x] === this.x && range[x + 1] === this.y) {
+        for (let i = 0; i < range.length - 1; i += 2) {
+          if (range[i] === x && range[i + 1] === y) {
             return true
           }
         }
