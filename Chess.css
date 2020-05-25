@@ -15,11 +15,12 @@ table {
 button {
   width: 4em;
   height: 4em;
+
 }
 
-image {
-  width: 1px;
-  height: 1px;
+.image {
+  width: 50;
+  height: 50;
 }
 
 .highlight {

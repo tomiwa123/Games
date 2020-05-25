@@ -7,7 +7,24 @@ for (let i = 0; i < 64; i++) {
     }
 }
 
-pawn = "<image src=\"pawn.png\" width=\"50\" height=\"50\"></image>"
+
+// Initialize images
+function createImage(link) {
+  return `<image src="${link}" width="50" height="50" class="image"></image>`
+}
+
+let whitePawn = createImage("http://www.clker.com/cliparts/f/a/5/7/12065718932136586127akiross_Chess_Set_1.svg.med.png")
+let blackPawn = createImage("http://www.clker.com/cliparts/6/f/1/b/1206571937784334796akiross_Chess_Set_7.svg.med.png")
+let whiteKnight = createImage("http://www.clker.com/cliparts/5/9/d/9/12065719081670854669akiross_Chess_Set_3.svg.med.png")
+let blackKnight = createImage("http://www.clker.com/cliparts/0/f/7/f/12065719521009467729akiross_Chess_Set_9.svg.med.png")
+let whiteBishop = createImage("http://www.clker.com/cliparts/6/4/a/5/12065719151168623253akiross_Chess_Set_4.svg.med.png")
+let blackBishop = createImage("http://www.clker.com/cliparts/6/c/2/b/12065719601120389952akiross_Chess_Set_10.svg.med.png")
+let whiteQueen = createImage("http://www.clker.com/cliparts/6/f/7/9/12065719231737836935akiross_Chess_Set_5.svg.med.png")
+let blackQueen = createImage("http://www.clker.com/cliparts/b/4/7/f/12065719671215835189akiross_Chess_Set_11.svg.med.png")
+let whiteKing = createImage("http://www.clker.com/cliparts/8/d/a/c/12065719301527417470akiross_Chess_Set_6.svg.med.png")
+let blackKing = createImage("http://www.clker.com/cliparts/7/e/5/a/12065719751931377215akiross_Chess_Set_12.svg.med.png")
+let whiteRook = createImage("http://www.clker.com/cliparts/b/7/7/a/1206571900418344921akiross_Chess_Set_2.svg.med.png")
+let blackRook = createImage("http://www.clker.com/cliparts/2/6/c/d/1206571945914509596akiross_Chess_Set_8.svg.med.png")
 
 let allPieces = []
 let currentPiece = null
@@ -23,14 +40,45 @@ class GeneralObj {
     this.hasMoved = false
   }
 
-  draw() {
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-  }
-
   draw(oldX, oldY) {
-    $("button").eq(oldX + oldY * 8).text("");
-    $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
-    $("button").eq(this.buttonNumber).css("color", this.color);
+    $("button").eq(oldX + oldY * 8).html("");
+    if (this.name === "pawn") {
+      if (this.color === "white") {
+        $("button").eq(this.buttonNumber).html(whitePawn);
+      } else {
+        $("button").eq(this.buttonNumber).html(blackPawn);
+      }
+    } else if (this.name === "knight") {
+        if (this.color === "white") {
+          $("button").eq(this.buttonNumber).html(whiteKnight);
+        } else {
+          $("button").eq(this.buttonNumber).html(blackKnight);
+        }
+    } else if (this.name === "bishop") {
+        if (this.color === "white") {
+          $("button").eq(this.buttonNumber).html(whiteBishop);
+        } else {
+          $("button").eq(this.buttonNumber).html(blackBishop);
+        }
+    } else if (this.name === "Queen") {
+        if (this.color === "white") {
+          $("button").eq(this.buttonNumber).html(whiteQueen);
+        } else {
+          $("button").eq(this.buttonNumber).html(blackQueen);
+        }
+    } else if (this.name === "rook") {
+        if (this.color === "white") {
+          $("button").eq(this.buttonNumber).html(whiteRook);
+        } else {
+          $("button").eq(this.buttonNumber).html(blackRook);
+        }
+    } else {
+      if (this.color === "white") {
+        $("button").eq(this.buttonNumber).html(whiteKing);
+      } else {
+        $("button").eq(this.buttonNumber).html(blackKing);
+      }
+    }
     $("button").removeClass("highlight")
   }
 
@@ -577,8 +625,6 @@ $("button").click(function () {
     $("button").removeClass("highlight")
   }
 })
-
-let gameEnd = false
 
 function checkMate(color) {
   let piece;
