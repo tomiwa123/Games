@@ -20,6 +20,7 @@ class GeneralObj {
     this.buttonNumber = x + y * 8;
     this.name = name;
     this.color = color;
+    this.hasMoved = false
   }
 
   draw() {
@@ -29,6 +30,7 @@ class GeneralObj {
   draw(oldX, oldY) {
     $("button").eq(oldX + oldY * 8).text("");
     $("button").eq(this.buttonNumber).text(this.color+" "+this.name);
+    $("button").eq(this.buttonNumber).css("color", this.color);
     $("button").removeClass("highlight")
   }
 
@@ -49,6 +51,18 @@ class GeneralObj {
     let aPiece
     for (aPiece of allPieces) {
       if (aPiece.name === name && aPiece.color === color) {
+        piece = aPiece
+      }
+    }
+    return piece
+  }
+
+  getPieceByTypeAndLocation(name, color, x, y) {
+    piece = null
+    let aPiece
+    for (aPiece of allPieces) {
+      if (aPiece.name === name && aPiece.color === color &&
+          aPiece.y === y && aPiece.x === x) {
         piece = aPiece
       }
     }
@@ -122,6 +136,14 @@ class GeneralObj {
     this.y = y;
     this.buttonNumber = x + y * 8;
 
+  	// Account for castling
+    let castlingRook = null;
+    if (x === 6 && this.name === "king" && !this.hasMoved) {
+      castlingRook = this.getPieceByTypeAndLocation("rook", this.color, 7, this.y)
+      castlingRook.move(5, this.y, true)
+      castlingRook.draw(7, this.y)
+    }
+
     // Check Error Check
     if (!override) {
       if (this.getPieceByType("king", this.color).isChecked()) {
@@ -135,6 +157,10 @@ class GeneralObj {
         this.y = oldY;
         this.buttonNumber = oldX + oldY * 8;
         this.draw();
+        if (castlingRook !== null ) {
+          castlingRook.move(7, this.y, true)
+          castlingRook.draw(5, this.y)
+        }
         return "Self Check"
       }
     }
@@ -425,6 +451,17 @@ class KingObj extends GeneralObj {
     this.exploreDiagonal(newX, newY, true)
 
     //Implementing Castling
+    if (this.x === 4 && !this.hasMoved) {
+      let rook = this.getPieceByTypeAndLocation("rook", this.color, 7, this.y)
+      if (rook !== null && !rook.hasMoved) {
+        console.log("Here")
+        if (this.getPiece(5, this.y) === null &&
+            this.getPiece(6, this.y) === null) {
+          this.range.push(6)
+          this.range.push(this.y)
+        }
+      }
+    }
 
     return this.range
   }
@@ -492,7 +529,7 @@ for (let row = 0; row < 8; row++) {
       allPieces.push(new BishopObj(col, row, color))
     }  else if (col === 0 || col === 7) {
       allPieces.push(new RookObj(col, row, color))
-    }  else if (col == 4) {
+    }  else if (col == 3) {
       allPieces.push(new QueenObj(col, row, color))
     } else if (col == 1 || col == 6) {
       allPieces.push(new KnightObj(col, row, color))
@@ -548,7 +585,7 @@ function checkMate(color) {
   let piece;
   for (piece of allPieces) {
     if (piece.name === "king" && piece.color === color) {
-      if (piece.isCheckmated()) {
+      if (piece.isCheckmated() && piece.isChecked()) {
         $('h3').eq(1).html(`<h3 align="center">
         ${piece.color.charAt(0).toUpperCase() + piece.color.slice(1)}
         has been checkmated!</h3>`)
