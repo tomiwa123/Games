@@ -73,11 +73,17 @@ class GeneralObj {
   }
 
   displayRange() {
-    if ($("button").hasClass("highlight")) {
-      $("button").removeClass("highlight")
-      return
-    }
     const range = this.getRange()
+
+    // Give the player the option to deselct a piece
+    if (range.length != 0) {
+      if ($("button").eq(range[0] + 8 * range[1]).hasClass("highlight")) {
+        $("button").removeClass("highlight")
+        return
+      }
+    }
+
+    $("button").removeClass("highlight")
     for (let coord = 0; coord < range.length; coord += 2) {
       $("button").eq(range[coord] + 8 * range[coord + 1]).toggleClass("highlight")
     }
@@ -418,6 +424,8 @@ class KingObj extends GeneralObj {
     newY = this.y - 1
     this.exploreDiagonal(newX, newY, true)
 
+    //Implementing Castling
+
     return this.range
   }
 
@@ -498,21 +506,32 @@ for (piece of allPieces) {
 }
 
 // Respond to click to show moves
+let turn = "white"
 $("button").click(function () {
   const index = $("button").index(this)
+
+  // Get the piece if it exists
   let piece = null
   for (aPiece of allPieces) {
     if (aPiece.buttonNumber === index) {
       piece = aPiece
     }
   }
-  if ($(this).hasClass("highlight")) {
-    if (currentPiece.move(index % 8, Math.floor(index / 8)) === "Self Check") {
-      checkMate(currentPiece.color)
-      alert("Need to perform a move that resolves Check")
-    }
 
-  } else if (piece != null) {
+  if ($(this).hasClass("highlight")) {
+    // Handle the movement of an object into space
+    if (currentPiece.move(index % 8, Math.floor(index / 8)) === "Self Check") {
+      if (!checkMate(currentPiece.color)) {
+        alert("Need to perform a move that resolves Check")
+      }
+    } else {
+      let desiredColor = currentPiece.color === "white" ? "black" : "white"
+      turn = desiredColor
+      $('h3').eq(1).text(`It is ${turn}'s turn to play`)
+      checkMate(desiredColor)
+    }
+  } else if (piece !== null && piece.color == turn) {
+    // Handle the selection of a piece to see possible moves
     if (piece !== currentPiece) {
       previousPiece = currentPiece
       currentPiece = piece
@@ -526,13 +545,17 @@ $("button").click(function () {
 let gameEnd = false
 
 function checkMate(color) {
-  if (!gameEnd) {
-    for (piece of allPieces) {
-      if (piece.name === "king" && piece.color === color) {
-        if (piece.isCheckmated()) {
-          console.log("Checkmate")
-        }
+  let piece;
+  for (piece of allPieces) {
+    if (piece.name === "king" && piece.color === color) {
+      if (piece.isCheckmated()) {
+        $('h3').eq(1).html(`<h3 align="center">
+        ${piece.color.charAt(0).toUpperCase() + piece.color.slice(1)}
+        has been checkmated!</h3>`)
+        $("button").off("click")
+        return true
       }
     }
   }
+  return false
 }
