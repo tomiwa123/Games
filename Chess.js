@@ -34,16 +34,19 @@ class GeneralObj {
 
   getPiece(x, y) {
     piece = null
+    let aPiece;
     for (aPiece of allPieces) {
       if (aPiece.x === x && aPiece.y === y) {
         piece = aPiece
       }
     }
+
     return piece
   }
 
   getPieceByType(name, color) {
     piece = null
+    let aPiece
     for (aPiece of allPieces) {
       if (aPiece.name === name && aPiece.color === color) {
         piece = aPiece
@@ -90,31 +93,33 @@ class GeneralObj {
     return false
   }
 
-  move(x, y) {
-    const range = this.getRange()
-    if (!this.isValidMove(x, y, range)) {
-      console.log(`${x},${y}`)
-      console.log(range)
-      console.log("Invalid move. Nothing Done.")
-    } else {
-      let toDelete = this.getPiece(x, y)
+  move(x, y, override=false) {
 
-      if (toDelete === null && this.name === "pawn" &&
-          Math.abs(x - this.x) === 1 && y === this.y + this.direction) {
-        toDelete = this.getPiece(x, this.y)
-        $("button").eq(x + this.y * 8).text("");
-      }
-      if (toDelete !== null) {
-        allPieces.splice(allPieces.indexOf(toDelete), 1)
-      }
-      const oldX = this.x;
-      const oldY = this.y;
-      this.x = x;
-      this.y = y;
-      this.buttonNumber = x + y * 8;
+    let toDelete = this.getPiece(x, y)
 
-      // Check Error Check
+    if (toDelete !== null && toDelete.name === "king") {
+      return toDelete
+    }
+
+    if (toDelete === null && this.name === "pawn" &&
+        Math.abs(x - this.x) === 1 && y === this.y + this.direction) {
+      toDelete = this.getPiece(x, this.y)
+      $("button").eq(x + this.y * 8).text("");
+    }
+
+    if (toDelete !== null) {
+      allPieces.splice(allPieces.indexOf(toDelete), 1)
+    }
+    const oldX = this.x;
+    const oldY = this.y;
+    this.x = x;
+    this.y = y;
+    this.buttonNumber = x + y * 8;
+
+    // Check Error Check
+    if (!override) {
       if (this.getPieceByType("king", this.color).isChecked()) {
+
         $('button').removeClass("highlight")
         if (toDelete != null) {
           allPieces.push(toDelete)
@@ -123,13 +128,16 @@ class GeneralObj {
         this.x = oldX;
         this.y = oldY;
         this.buttonNumber = oldX + oldY * 8;
+        this.draw();
         return "Self Check"
       }
-
-      this.draw(oldX, oldY);
-      this.hasMoved = true;
     }
+
+    this.draw(oldX, oldY);
+    this.hasMoved = true;
+    return toDelete
   }
+
 }
 
 class PawnObj extends GeneralObj {
@@ -414,6 +422,7 @@ class KingObj extends GeneralObj {
   }
 
   isChecked() {
+    let piece;
     for (piece of allPieces) {
       if (piece.color !== this.color) {
         let range = piece.getRange()
@@ -428,17 +437,30 @@ class KingObj extends GeneralObj {
   }
 
   isCheckmated() {
+    let piece;
     for (piece of allPieces) {
       if (piece.color === this.color) {
         let range = piece.getRange()
-        for (let x = 0; x < range.length - 1; x += 2) {
-          if (piece.move(range[x], range[x + 1]) !== undefined) {
-            return true
+        for (let i = 0; i < range.length - 1; i += 2) {
+          let x = piece.x
+          let y = piece.y
+          let hasMoved = piece.hasMoved
+          let response = piece.move(range[i], range[i + 1])
+          if (response == null) {
+            piece.move(x, y, true)
+            piece.hasMoved = hasMoved
+            return false
+          } else if (response !== "Self Check") {
+            piece.move(x, y, true)
+            piece.hasMoved = hasMoved
+            allPieces.push(response)
+            response.draw()
+            return false
           }
         }
       }
     }
-    return false
+    return true
   }
 }
 
@@ -485,7 +507,8 @@ $("button").click(function () {
     }
   }
   if ($(this).hasClass("highlight")) {
-    if (currentPiece.move(index % 8, Math.floor(index / 8)) !== undefined) {
+    if (currentPiece.move(index % 8, Math.floor(index / 8)) === "Self Check") {
+      checkMate(currentPiece.color)
       alert("Need to perform a move that resolves Check")
     }
 
@@ -499,3 +522,17 @@ $("button").click(function () {
     $("button").removeClass("highlight")
   }
 })
+
+let gameEnd = false
+
+function checkMate(color) {
+  if (!gameEnd) {
+    for (piece of allPieces) {
+      if (piece.name === "king" && piece.color === color) {
+        if (piece.isCheckmated()) {
+          console.log("Checkmate")
+        }
+      }
+    }
+  }
+}
