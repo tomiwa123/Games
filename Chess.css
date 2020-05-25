@@ -18,9 +18,8 @@ button {
 
 }
 
-.image {
-  width: 50;
-  height: 50;
+.rotate {
+  transform: rotate(180deg);
 }
 
 .highlight {

@@ -10,7 +10,7 @@ for (let i = 0; i < 64; i++) {
 
 // Initialize images
 function createImage(link) {
-  return `<image src="${link}" width="50" height="50" class="image"></image>`
+  return `<image src="${link}" width="50" height="50"></image>`
 }
 
 let whitePawn = createImage("http://www.clker.com/cliparts/f/a/5/7/12065718932136586127akiross_Chess_Set_1.svg.med.png")
@@ -611,6 +611,14 @@ $("button").click(function () {
     } else {
       let desiredColor = currentPiece.color === "white" ? "black" : "white"
       turn = desiredColor
+      // Turn here
+      if (turn === "black") {
+        $('table').css("transform", "rotate(180deg)")
+        $('img').css("transform", "rotate(180deg)")
+      } else {
+        $('table').css("transform", "rotate(360deg)")
+        $('img').css("transform", "rotate(360deg)")
+      }
       $('h3').eq(1).text(`It is ${turn}'s turn to play`)
       checkMate(desiredColor)
     }
