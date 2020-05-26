@@ -215,6 +215,29 @@ class GeneralObj {
 
     this.draw(oldX, oldY);
     this.hasMoved = true;
+    // Pawn promotion
+    if (this.name == "pawn" &&
+        (this.y + this.direction < 0 || this.y + this.direction > 7)) {
+          let response = ""
+          let options = ["Queen", "rook", "knight", "bishop"]
+          while (!options.includes(response)) {
+            response = prompt("What would you like to promote your pawn to? Queen, rook, bishop, or knight? ")
+          }
+          let desiredPiece = null;
+          if (response === options[0]) {
+            desiredPiece = new QueenObj(this.x, this.y, this.color)
+          } else if (response === options[1]) {
+            desiredPiece = new RookObj(this.x, this.y, this.color)
+          } else if (response === options[2]) {
+            desiredPiece = new KnightObj(this.x, this.y, this.color)
+          } else if (response === options[3]) {
+            desiredPiece = new BishopObj(this.x, this.y, this.color)
+          }
+          let index = allPieces.indexOf(this)
+          allPieces.splice(index, 1)
+          desiredPiece.draw(this.x, this.y)
+          allPieces.push(desiredPiece)
+        }
     return toDelete
   }
 
@@ -613,11 +636,11 @@ $("button").click(function () {
       turn = desiredColor
       // Turn here
       if (turn === "black") {
-        $('table').css("transform", "rotate(180deg)")
-        $('img').css("transform", "rotate(180deg)")
+        $('table').addClass("rotate")
+        $('img').addClass("rotate")
       } else {
-        $('table').css("transform", "rotate(360deg)")
-        $('img').css("transform", "rotate(360deg)")
+        $('table').removeClass("rotate")
+        $('img').removeClass("rotate")
       }
       $('h3').eq(1).text(`It is ${turn}'s turn to play`)
       checkMate(desiredColor)

@@ -18,8 +18,12 @@ button {
 
 }
 
+img {
+  transform: rotate(360deg);
+}
+
 .rotate {
-  transform: rotate(180deg);
+  transform: rotate(180deg) !important;
 }
 
 .highlight {
