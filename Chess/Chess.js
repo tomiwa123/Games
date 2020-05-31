@@ -634,7 +634,8 @@ $("button").click(function () {
     } else {
       let desiredColor = currentPiece.color === "white" ? "black" : "white"
       turn = desiredColor
-      // Turn here
+      
+      // Rotate based on turn here
       if (turn === "black") {
         $('table').addClass("rotate")
         $('img').addClass("rotate")
