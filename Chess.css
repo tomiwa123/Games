@@ -1,0 +1,31 @@
+body {
+  background-image: url(https://images.pexels.com/photos/5412/water-blue-ocean.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+h1, h3 {
+  color: yellow;
+}
+
+table {
+  border: yellow 0.2em solid;
+}
+
+button {
+  width: 4em;
+  height: 4em;
+
+}
+
+img {
+  transform: rotate(360deg);
+}
+
+.rotate {
+  transform: rotate(180deg) !important;
+}
+
+.highlight {
+  border: #0000EE solid 0.2em;
+}
