@@ -8,22 +8,41 @@ for (let i = 0; i < 64; i++) {
 }
 
 // Initialize images
-function createImage (link) {
+const createImage = link => {
   return `<image src='${link}' width='50' height='50'></image>`
 }
 
-const whitePawn = createImage('http://www.clker.com/cliparts/f/a/5/7/12065718932136586127akiross_Chess_Set_1.svg.med.png')
-const blackPawn = createImage('http://www.clker.com/cliparts/6/f/1/b/1206571937784334796akiross_Chess_Set_7.svg.med.png')
-const whiteKnight = createImage('http://www.clker.com/cliparts/5/9/d/9/12065719081670854669akiross_Chess_Set_3.svg.med.png')
-const blackKnight = createImage('http://www.clker.com/cliparts/0/f/7/f/12065719521009467729akiross_Chess_Set_9.svg.med.png')
-const whiteBishop = createImage('http://www.clker.com/cliparts/6/4/a/5/12065719151168623253akiross_Chess_Set_4.svg.med.png')
-const blackBishop = createImage('http://www.clker.com/cliparts/6/c/2/b/12065719601120389952akiross_Chess_Set_10.svg.med.png')
-const whiteQueen = createImage('http://www.clker.com/cliparts/6/f/7/9/12065719231737836935akiross_Chess_Set_5.svg.med.png')
-const blackQueen = createImage('http://www.clker.com/cliparts/b/4/7/f/12065719671215835189akiross_Chess_Set_11.svg.med.png')
-const whiteKing = createImage('http://www.clker.com/cliparts/8/d/a/c/12065719301527417470akiross_Chess_Set_6.svg.med.png')
-const blackKing = createImage('http://www.clker.com/cliparts/7/e/5/a/12065719751931377215akiross_Chess_Set_12.svg.med.png')
-const whiteRook = createImage('http://www.clker.com/cliparts/b/7/7/a/1206571900418344921akiross_Chess_Set_2.svg.med.png')
-const blackRook = createImage('http://www.clker.com/cliparts/2/6/c/d/1206571945914509596akiross_Chess_Set_8.svg.med.png')
+const getNotation = (x, y) => {
+  let xLetter = String.fromCharCode(97 + x)
+  return xLetter + (y + 1)
+}
+
+let moveMade = ''
+
+const whitePawn = createImage('imgs/noun_Pawn_102242.png')
+const blackPawn = createImage('imgs/noun_Pawn_102236.png')
+const whiteKnight = createImage('imgs/noun_Knight_67583.png')
+const blackKnight = createImage('imgs/noun_Knight_71306.png')
+const whiteBishop = createImage('imgs/noun_Bishop_67586.png')
+const blackBishop = createImage('imgs/noun_Bishop_71308.png')
+const whiteQueen = createImage('imgs/noun_queen_67580.png')
+const blackQueen = createImage('imgs/noun_queen_71305.png')
+const whiteKing = createImage('imgs/noun_King_67579.png')
+const blackKing = createImage('imgs/noun_King_71303.png')
+const whiteRook = createImage('imgs/noun_rook_67581.png')
+const blackRook = createImage('imgs/noun_rook_71309.png')
+// const whitePawn = createImage('http://www.clker.com/cliparts/f/a/5/7/12065718932136586127akiross_Chess_Set_1.svg.med.png')
+// const blackPawn = createImage('http://www.clker.com/cliparts/6/f/1/b/1206571937784334796akiross_Chess_Set_7.svg.med.png')
+// const blackKnight = createImage('http://www.clker.com/cliparts/0/f/7/f/12065719521009467729akiross_Chess_Set_9.svg.med.png')
+// const whiteKnight = createImage('http://www.clker.com/cliparts/5/9/d/9/12065719081670854669akiross_Chess_Set_3.svg.med.png')
+// const whiteBishop = createImage('http://www.clker.com/cliparts/6/4/a/5/12065719151168623253akiross_Chess_Set_4.svg.med.png')
+// const blackBishop = createImage('http://www.clker.com/cliparts/6/c/2/b/12065719601120389952akiross_Chess_Set_10.svg.med.png')
+// const whiteQueen = createImage('http://www.clker.com/cliparts/6/f/7/9/12065719231737836935akiross_Chess_Set_5.svg.med.png')
+// const blackQueen = createImage('http://www.clker.com/cliparts/b/4/7/f/12065719671215835189akiross_Chess_Set_11.svg.med.png')
+// const whiteKing = createImage('http://www.clker.com/cliparts/8/d/a/c/12065719301527417470akiross_Chess_Set_6.svg.med.png')
+// const blackKing = createImage('http://www.clker.com/cliparts/7/e/5/a/12065719751931377215akiross_Chess_Set_12.svg.med.png')
+// const whiteRook = createImage('http://www.clker.com/cliparts/b/7/7/a/1206571900418344921akiross_Chess_Set_2.svg.med.png')
+// const blackRook = createImage('http://www.clker.com/cliparts/2/6/c/d/1206571945914509596akiross_Chess_Set_8.svg.med.png')
 
 const allPieces = []
 let currentPiece = null
@@ -41,19 +60,19 @@ class GeneralObj {
 
   draw (oldX, oldY) {
     $('button').eq(oldX + oldY * 8).html('')
-    if (this.name === 'pawn') {
+    if (this.name === 'Pawn') {
       if (this.color === 'white') {
         $('button').eq(this.buttonNumber).html(whitePawn)
       } else {
         $('button').eq(this.buttonNumber).html(blackPawn)
       }
-    } else if (this.name === 'knight') {
+    } else if (this.name === 'Knight') {
       if (this.color === 'white') {
         $('button').eq(this.buttonNumber).html(whiteKnight)
       } else {
         $('button').eq(this.buttonNumber).html(blackKnight)
       }
-    } else if (this.name === 'bishop') {
+    } else if (this.name === 'Bishop') {
       if (this.color === 'white') {
         $('button').eq(this.buttonNumber).html(whiteBishop)
       } else {
@@ -65,7 +84,7 @@ class GeneralObj {
       } else {
         $('button').eq(this.buttonNumber).html(blackQueen)
       }
-    } else if (this.name === 'rook') {
+    } else if (this.name === 'Rook') {
       if (this.color === 'white') {
         $('button').eq(this.buttonNumber).html(whiteRook)
       } else {
@@ -165,19 +184,19 @@ class GeneralObj {
 
   checkInvalidMove (x, y) {
     // Castling
-    if ((x === 6 || x === 2) && this.name === 'king' && !this.hasMoved) {
+    if ((x === 6 || x === 2) && this.name === 'King' && !this.hasMoved) {
       // Handled logic for castling in KingObj
       return false
     }
 
     let toDelete = this.getPiece(x, y)
 
-    if (toDelete !== null && toDelete.name === 'king') {
+    if (toDelete !== null && toDelete.name === 'King') {
       return true
     }
 
     // En passant
-    if (toDelete === null && this.name === 'pawn' &&
+    if (toDelete === null && this.name === 'Pawn' &&
         Math.abs(x - this.x) === 1 && y === this.y + this.direction) {
       toDelete = this.getPiece(x, this.y)
     }
@@ -194,7 +213,7 @@ class GeneralObj {
     let output = false
 
     // Check Error Check
-    if (this.getPieceByType('king', this.color).isChecked()) {
+    if (this.getPieceByType('King', this.color).isChecked()) {
       output = true
     }
 
@@ -209,18 +228,41 @@ class GeneralObj {
     return output
   }
 
-  move (x, y, override = false) {
+  move (x, y, override = false, notation = true) {
+    
+    // Some setup for notations
+    let sharedTarget = false
+    if (this.name === 'Rook' || this.name === 'Knight') {
+      for (let piece of allPieces) {
+        if (piece.name === this.name && piece.color === this.color && !(piece.x === this.x && piece.y === this.y)) {
+          const range = piece.getRange()
+          for (let i = 0; i < range.length - 1; i += 2) {
+            if (range[i] === x && range[i + 1] === y) {
+              if (piece.x !== this.x) {
+                sharedTarget = String.fromCharCode(97 + this.x)
+              } else {
+                sharedTarget = this.y
+              }
+              break
+            }
+          }
+        }
+      }
+    }
+    
     let toDelete = this.getPiece(x, y)
 
-    if (toDelete !== null && toDelete.name === 'king') {
+    if (toDelete !== null && toDelete.name === 'King') {
       return toDelete
     }
 
     // En passant
-    if (toDelete === null && this.name === 'pawn' &&
+    let enPassant = false
+    if (toDelete === null && this.name === 'Pawn' &&
         Math.abs(x - this.x) === 1 && y === this.y + this.direction) {
       toDelete = this.getPiece(x, this.y)
       $('button').eq(x + this.y * 8).text('')
+      enPassant = true
     }
 
     if (toDelete !== null) {
@@ -234,20 +276,20 @@ class GeneralObj {
 
     // Account for castling
     let castlingRook = null
-    if (x === 6 && this.name === 'king' && !this.hasMoved) {
-      castlingRook = this.getPieceByTypeAndLocation('rook', this.color, 7, this.y)
+    if (x === 6 && this.name === 'King' && !this.hasMoved) {
+      castlingRook = this.getPieceByTypeAndLocation('Rook', this.color, 7, this.y)
       castlingRook.move(5, this.y, true)
       castlingRook.draw(7, this.y)
     }
-    if (x === 2 && this.name === 'king' && !this.hasMoved) {
-      castlingRook = this.getPieceByTypeAndLocation('rook', this.color, 0, this.y)
+    if (x === 2 && this.name === 'King' && !this.hasMoved) {
+      castlingRook = this.getPieceByTypeAndLocation('Rook', this.color, 0, this.y)
       castlingRook.move(3, this.y, true)
       castlingRook.draw(0, this.y)
     }
 
     // Check Error Check
     if (!override) {
-      if (this.getPieceByType('king', this.color).isChecked()) {
+      if (this.getPieceByType('King', this.color).isChecked()) {
         $('button').removeClass('highlight')
         if (toDelete !== null) {
           allPieces.push(toDelete)
@@ -272,24 +314,96 @@ class GeneralObj {
 
     this.draw(oldX, oldY)
     this.hasMoved = true
+
+    // Determine notation
+    if (notation) {
+      moveMade = ' '
+      if (this.name === 'Pawn') {
+        if (toDelete !== null) {
+          moveMade += String.fromCharCode(97 + oldX) + 'x' + `${getNotation(this.x, this.y)}`
+          if (enPassant) {
+            moveMade += '(ep)'
+          }
+        } else {
+          moveMade += `${getNotation(this.x, this.y)}` 
+        }
+      } else {
+        const captured = toDelete ? 'x' : ''
+        let specifier = sharedTarget ? sharedTarget : ''
+        if (this.name == 'Knight') {
+          // const range = this.getRange()
+          // let piece
+          // for (let i = 0; i < range.length - 1; i += 2) {
+          //   piece = this.getPiece(range[i], range[i + 1])
+          //   console.log('Piece found', piece)
+          //   if (piece && piece.name === this.name && piece.color === this.color && !(piece.x === this.x && piece.y === this.y)) {
+          //       console.log('Knight found:', piece)
+          //         if (piece.x !== oldX) {
+          //           specifier = String.fromCharCode(97 + oldX)
+          //         } else {
+          //           specifier = oldY
+          //         }
+          //         break
+          //   }
+          // }
+          moveMade += 'N' + specifier + captured + `${getNotation(this.x, this.y)}`
+        } else if (this.name == 'King') {
+          if (castlingRook) {
+            if (castlingRook.x === 5) {
+              moveMade += 'o-o'
+            } else {
+              moveMade += 'o-o-o'
+            }
+          } else {
+            moveMade += 'K' + captured + `${getNotation(this.x, this.y)}`
+          }
+        } else {
+          let specifier = sharedTarget ? sharedTarget : ''
+          // if (this.name === 'Rook') {
+          //   const range = this.getRange()
+          //   let piece
+          //   for (let i = 0; i < range.length - 1; i += 2) {
+          //     piece = this.getPiece(range[i], range[i + 1])
+          //     if (piece && piece.name === this.name && piece.color === this.color) {
+          //           if (piece.x !== oldX) {
+          //             specifier = String.fromCharCode(97 + oldX)
+          //           } else {
+          //             specifier = oldY
+          //           }
+          //           break
+          //     }
+          //   }
+          // }
+          moveMade += this.name[0] + specifier + captured + `${getNotation(this.x, this.y)}`
+        }
+      }
+      let oppositeColor = this.color === 'white' ? 'black' : 'white'
+      if (this.getPieceByType('King', oppositeColor).isChecked()) {
+        moveMade += '+'
+      }
+    }
+
     // Pawn promotion
-    if (this.name === 'pawn' &&
+    if (this.name === 'Pawn' &&
         (this.y + this.direction < 0 || this.y + this.direction > 7)) {
-      console.log(this)
       let response = ''
-      const options = ['Queen', 'rook', 'knight', 'bishop']
+      const options = ['Queen', 'Rook', 'Knight', 'Bishop']
       while (!options.includes(response)) {
-        response = prompt('What would you like to promote your pawn to? Queen, rook, bishop, or knight? ')
+        response = prompt('What would you like to promote your pawn to? Queen, Rook, Bishop, or Knight? ')
       }
       let desiredPiece = null
       if (response === options[0]) {
         desiredPiece = new QueenObj(this.x, this.y, this.color)
+        moveMade += '=Q'
       } else if (response === options[1]) {
         desiredPiece = new RookObj(this.x, this.y, this.color)
+        moveMade += '=R'
       } else if (response === options[2]) {
         desiredPiece = new KnightObj(this.x, this.y, this.color)
+        moveMade += '=N'
       } else if (response === options[3]) {
         desiredPiece = new BishopObj(this.x, this.y, this.color)
+        moveMade += '=B'
       }
       const index = allPieces.indexOf(this)
       allPieces.splice(index, 1)
@@ -302,7 +416,7 @@ class GeneralObj {
 
 class PawnObj extends GeneralObj {
   constructor (x, y, color) {
-    super(x, y, color, 'pawn')
+    super(x, y, color, 'Pawn')
     this.direction = (color === 'white') ? -1 : 1
     this.hasMoved = false
   }
@@ -318,13 +432,15 @@ class PawnObj extends GeneralObj {
       this.range.pop()
     }
 
-    newY = this.y + 2 * this.direction
-    if (!this.hasMoved) {
-      toContinue = this.exploreDiagonal(newX, newY, toContinue)
-      if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 &&
-          !toContinue) {
-        this.range.pop()
-        this.range.pop()
+    if (toContinue) {
+      newY = this.y + 2 * this.direction
+      if (!this.hasMoved) {
+        toContinue = this.exploreDiagonal(newX, newY, true)
+        if (newX >= 0 && newX < 8 && newY >= 0 && newY < 8 &&
+            !toContinue && this.getPiece(newX, newY).color !== this.color) {
+          this.range.pop()
+          this.range.pop()
+        }
       }
     }
 
@@ -345,7 +461,7 @@ class PawnObj extends GeneralObj {
 
     // Empasson implementation
     if (previousPiece !== null) {
-      if (previousPiece.name === 'pawn' && previousPiece.color !== this.color) {
+      if (previousPiece.name === 'Pawn' && previousPiece.color !== this.color) {
         const rank = this.color === 'white' ? 3 : 4;
         if (previousPiece.y === this.y && Math.abs(previousPiece.x - this.x) === 1 &&
             this.y === rank) {
@@ -361,7 +477,7 @@ class PawnObj extends GeneralObj {
 
 class BishopObj extends GeneralObj {
   constructor (x, y, color) {
-    super(x, y, color, 'bishop')
+    super(x, y, color, 'Bishop')
   }
 
   getRange () {
@@ -398,7 +514,7 @@ class BishopObj extends GeneralObj {
 
 class RookObj extends GeneralObj {
   constructor (x, y, color) {
-    super(x, y, color, 'rook')
+    super(x, y, color, 'Rook')
   }
 
   getRange () {
@@ -491,14 +607,13 @@ class QueenObj extends GeneralObj {
       newY = this.y + i
       bl = this.exploreDiagonal(newX, newY, bl)
     }
-    // console.log(this.range)
     return this.range
   }
 }
 
 class KnightObj extends GeneralObj {
   constructor (x, y, color) {
-    super(x, y, color, 'knight')
+    super(x, y, color, 'Knight')
   }
 
   getRange () {
@@ -541,7 +656,7 @@ class KnightObj extends GeneralObj {
 
 class KingObj extends GeneralObj {
   constructor (x, y, color) {
-    super(x, y, color, 'king')
+    super(x, y, color, 'King')
   }
 
   getRange (castling = true) {
@@ -580,7 +695,7 @@ class KingObj extends GeneralObj {
 
     // Implementing Castling
     if (castling && !this.hasMoved && !this.isChecked()) {
-      const rook = this.getPieceByTypeAndLocation('rook', this.color, 7, this.y)
+      const rook = this.getPieceByTypeAndLocation('Rook', this.color, 7, this.y)
       if (rook !== null && !rook.hasMoved) {
         if (this.getPiece(5, this.y) === null && !this.isChecked(5) &&
             this.getPiece(6, this.y) === null && !this.isChecked(6)) {
@@ -588,7 +703,7 @@ class KingObj extends GeneralObj {
           this.range.push(this.y)
         }
       }
-      const rook2 = this.getPieceByTypeAndLocation('rook', this.color, 0, this.y)
+      const rook2 = this.getPieceByTypeAndLocation('Rook', this.color, 0, this.y)
       if (rook2 !== null && !rook2.hasMoved) {
         if (this.getPiece(3, this.y) === null && !this.isChecked(3) &&
             this.getPiece(2, this.y) === null && !this.isChecked(2) &&
@@ -607,7 +722,7 @@ class KingObj extends GeneralObj {
     for (piece of allPieces) {
       if (piece.color !== this.color) {
         let range
-        if (piece.name === 'king') {
+        if (piece.name === 'King') {
           range = piece.getRange(false)
         } else {
           range = piece.getRange()
@@ -631,13 +746,13 @@ class KingObj extends GeneralObj {
           const x = piece.x
           const y = piece.y
           const hasMoved = piece.hasMoved
-          const response = piece.move(range[i], range[i + 1])
+          const response = piece.move(range[i], range[i + 1], false, false)
           if (response === null) {
-            piece.move(x, y, true)
+            piece.move(x, y, true, false)
             piece.hasMoved = hasMoved
             return false
           } else if (response !== 'Self Check') {
-            piece.move(x, y, true)
+            piece.move(x, y, true, false)
             piece.hasMoved = hasMoved
             allPieces.push(response)
             response.draw()
@@ -727,15 +842,25 @@ $('button').click(function () {
 function checkMate (color) {
   let piece
   for (piece of allPieces) {
-    if (piece.name === 'king' && piece.color === color) {
+    if (piece.name === 'King' && piece.color === color) {
       if (piece.isCheckmated() && piece.isChecked()) {
         $('h3').eq(1).html(`<h3 align='center'>
         ${piece.color.charAt(0).toUpperCase() + piece.color.slice(1)}
         has been checkmated!</h3>`)
         $('button').off('click')
+        addMove(moveMade + '+')
         return true
       }
     }
   }
+  addMove(moveMade)
   return false
+}
+
+const addMove = move => {
+  if (turn === 'white') {
+    $('#blackMoves')[0].textContent += move
+  } else {
+    $('#whiteMoves')[0].textContent += move
+  }
 }

@@ -1,11 +1,17 @@
 body {
   background-image: url(https://images.pexels.com/photos/5412/water-blue-ocean.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500);
-  background-repeat: no-repeat;
+  /* background-repeat: no-repeat; */
   background-size: cover;
 }
 
 h1, h3 {
   color: yellow;
+  text-align: center;
+}
+
+h5 {
+  text-align: center;
+  margin: 2rem;
 }
 
 table {
@@ -27,5 +33,9 @@ img {
 }
 
 .highlight {
-  border: #0000EE solid 0.2em;
+  border: yellow solid 0.2em;
+}
+
+.moves {
+  text-align: center;
 }
